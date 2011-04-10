@@ -1,7 +1,7 @@
 <project name="josm-plugins" default="build" basedir=".">
     <target name="compile_josm" unless="skip-josm">
     <echo message="test"/>
-        <ant dir="../core" target="dist" />
+        <ant dir="../" target="dist" />
     </target>
     <target name="compile" depends="compile_josm"></target>
     <target name="build" depends="dist"></target>
@@ -9,6 +9,7 @@
         <mkdir dir="../dist"/>
         <ant antfile="build.xml" target="dist" dir="addrinterpolation"/>
         <ant antfile="build.xml" target="dist" dir="alignways"/>
+    	<ant antfile="build.xml" target="dist" dir="AreaCut"/>
         <ant antfile="build.xml" target="dist" dir="buildings_tools"/>
         <ant antfile="build.xml" target="dist" dir="cadastre-fr"/>
         <ant antfile="build.xml" target="dist" dir="colorscheme"/>

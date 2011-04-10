@@ -1,18 +1,15 @@
 package org.openstreetmap.josm.plugins.areacut;
 
-import static org.openstreetmap.josm.tools.I18n.tr;
+import static org.openstreetmap.josm.tools.I18n.*;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
 
-import javax.swing.JOptionPane;
 
 import org.openstreetmap.josm.Main;
 import org.openstreetmap.josm.actions.JosmAction;
@@ -20,13 +17,14 @@ import org.openstreetmap.josm.command.ChangePropertyCommand;
 import org.openstreetmap.josm.command.Command;
 import org.openstreetmap.josm.command.SequenceCommand;
 import org.openstreetmap.josm.data.osm.Node;
-import org.openstreetmap.josm.data.osm.OsmPrimitive;
 import org.openstreetmap.josm.data.osm.Way;
 import org.openstreetmap.josm.tools.Shortcut;
 
 public class AreaCutAction extends JosmAction {
 
-    public AreaCutAction() {
+	private static final long serialVersionUID = 3477176320729125522L;
+
+	public AreaCutAction() {
         super(tr("Area cut"),
                 "areaCut",
                 tr("Cut area into pieces"),
@@ -64,8 +62,6 @@ public class AreaCutAction extends JosmAction {
         List <Node> newArea1=new ArrayList<Node>();
         List <Node> newArea2=new ArrayList<Node>();
         
-        Node c1=null;
-        Node c2=null;
         
         
         int g=0;
