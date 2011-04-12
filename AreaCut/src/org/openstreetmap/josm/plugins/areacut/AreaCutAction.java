@@ -46,7 +46,6 @@ public class AreaCutAction extends JosmAction {
         			area=w;
         	}
         }
-        System.out.println((area==null)+":"+(line==null));
         if(area==null||line==null)return;
         
         List<Node> nodes1=line.getNodes();
@@ -129,6 +128,7 @@ public class AreaCutAction extends JosmAction {
         
         for(int z=0;z<newAreas.size();z++){
         	Way w=newAreas.get(z);
+        	removeDub(w);
         	w.setKeys(area.getKeys());
         	Main.main.getCurrentDataSet().addPrimitive(w);        	
         }
@@ -149,7 +149,7 @@ public class AreaCutAction extends JosmAction {
     	List<Node> nod=new ArrayList<Node>();
     	int p=nodes.size();
     	System.out.println(p+":"+n);
-    	for(int i=n;i<p+n-1;i++){
+    	for(int i=n;i<p+n;i++){
     		nod.add(nodes.get(i%p));
     	}
     	nod.add(nod.get(0));
@@ -171,20 +171,25 @@ public class AreaCutAction extends JosmAction {
     		}
     	}
     	    	
-    	//Remove dubles
+    	removeDub(w1);    	
+    }
+    
+    
+    private void removeDub(Way w1){
+  //	Remove dubles
     	Node lastnode=w1.getNode(0);
     	List <Node> ln=w1.getNodes();
     	for(int i=1;i<ln.size();){
     		if(lastnode==w1.getNode(i)){
     			ln.remove(i);
+    			lastnode=w1.getNode(i);
     		}else{
     			i++;
     		}    			
     	}
     	ln.add(ln.get(0));
-    	w1.setNodes(ln);    	
+    	w1.setNodes(ln);   
     }
-
     @Override
     protected void updateEnabledState() {
         setEnabled(getCurrentDataSet() != null);
