@@ -46,67 +46,143 @@ public class AreaCutAction extends JosmAction {
         			area=w;
         	}
         }
+        System.out.println((area==null)+":"+(line==null));
         if(area==null||line==null)return;
         
         List<Node> nodes1=line.getNodes();
-        List<Node> nodes2=area.getNodes();        
         
-        //looking for node in nodes2==nodes1[0]
-        i=nodes2.iterator();
-        
-        List <Node> newArea1=new ArrayList<Node>();
-        List <Node> newArea2=new ArrayList<Node>();
+        List<Node> nodes2=area.getNodes();
+        int first_node=nodes2.indexOf(nodes1.get(0));
+        nodes2=moveNodes(nodes2,first_node);
         
         
         
-        int g=0;
-        while(i.hasNext()){
-        	Node n=(Node) i.next();
-        	System.out.println("ITERATE");
-        	 if((n==nodes1.get(0)||n==nodes1.get(nodes1.size()-1))&&g==0){
-        		System.out.println("First cross");
-        		g=1;
-        	}else if(n==nodes1.get(nodes1.size()-1)&&g==1){
-    			System.out.println("Secend cross");
-        		for(int j=0;j<nodes1.size()-1;j++){
-                	newArea1.add(nodes1.get(j));
-                	System.out.println("Added to 1 from way");                	
-                }
-        		for(int j=nodes1.size()-1;j>=0;j--){
-                	newArea2.add(nodes1.get(j));
-                	System.out.println("Added to 2 from way");
-                }          		
-        		g=2;
-        	}
-    		else if(n==nodes1.get(0)&&g==1){
-        		
-        		System.out.println("Secend cross");
-        		for(int j=nodes1.size()-1;j>0;j--){
-                	newArea1.add(nodes1.get(j));
-                	System.out.println("Added to 1 from way");                	
-                }
-        		for(int j=0;j<nodes1.size();j++){
-                	newArea2.add(nodes1.get(j));
-                	System.out.println("Added to 2 from way");
-                }   
-        		g=2;
-    		}
-        	
-        		if(g==0||g==2){
-        			newArea1.add(n);
-            		System.out.println("Added to 1");
-        		}else{
-        			newArea2.add(n);
-            		System.out.println("Added to 2");
+        List <Way> newAreas=new ArrayList<Way>();
+        
+        
+        Node lastCrossNode=null;
+        Way tmpWay=new Way();
+        Node firstN=null;
+        //TODO OPT.
+        int zzz=0;
+        
+        Iterator iter1=nodes2.iterator();
+        while(iter1.hasNext()){
+        	Node n1=null;
+        	n1=(Node)iter1.next();
+        	Iterator j=nodes1.iterator();
+        	////////////////////////////////
+        	boolean isIn=false;
+        	while(j.hasNext()){
+        		Node n2=(Node)j.next();
+        		if(n1==n2){
+        			isIn=true;
         		}
+        	}
+        	////////////////////////////////
+        	tmpWay.addNode(n1);
         	
+        	if(isIn){
+        		System.out.println("IsIn");
+        		if(lastCrossNode!=null){
+        			//make area
+        			Way wt=new Way();
+        			Iterator p=nodes1.iterator();
+        			boolean adding=false;
+        			while(p.hasNext()){
+        				Node n3=(Node)p.next();
+        				
+        				//START,STOP adding
+        				if(n3==lastCrossNode||n3==n1){
+        					adding=!adding;
+        					if(!adding)
+        						wt.addNode(n3);
+        				}
+        					
+        				if(adding)
+        					wt.addNode(n3);
+        			}
+        			//CONNECT ways
+        			System.out.println("Dodaje nowy");
+        			addToWay(tmpWay,wt);
+        			newAreas.add(tmpWay);        			
+        			tmpWay=new Way();
+        			tmpWay.addNode(n1);
+        		}
+        		
+        		lastCrossNode=n1;
+        	}
+        	        	
         }
         
-        if(newArea1.size()>0)
-        	line.setNodes(newArea1);
-        if(newArea2.size()>0)
-        	area.setNodes(newArea2);
+        //Remove bugs 
+        //(areas with 3 nodes)
+        for(int z=0;z<newAreas.size();){
+        	if(newAreas.get(z).getNodesCount()<=3)
+        		newAreas.remove(z);
+        	else
+        		z++;
+        }
+        
+        
+        
+        
+        for(int z=0;z<newAreas.size();z++){
+        	Way w=newAreas.get(z);
+        	w.setKeys(area.getKeys());
+        	Main.main.getCurrentDataSet().addPrimitive(w);        	
+        }
+        
+        
+        
+        
+        
+        Main.main.getCurrentDataSet().removePrimitive(area.getPrimitiveId());
+        if(line.getKeys().size()==0)
+        	Main.main.getCurrentDataSet().removePrimitive(line.getPrimitiveId());	
+        
+        
                 
+    }
+    
+    private List<Node> moveNodes(List<Node>nodes,int n){    	
+    	List<Node> nod=new ArrayList<Node>();
+    	int p=nodes.size();
+    	System.out.println(p+":"+n);
+    	for(int i=n;i<p+n-1;i++){
+    		nod.add(nodes.get(i%p));
+    	}
+    	nod.add(nod.get(0));
+    	return nod;
+    }
+    
+    private void addToWay(Way w1,Way add){
+    	//TODO OPT.
+    	
+    	if(w1.getNode(0)==add.getNode(0)){
+    		for(int i=add.getNodesCount()-1;i>=0;i--){
+    			if(add.getNode(i)!=w1.getNode(0)&&add.getNode(i)!=w1.getNode(w1.getNodesCount()-1))
+    				w1.addNode(add.getNode(i));
+    		}
+    	}else if(w1.getNode(w1.getNodesCount()-1)==add.getNode(0)){
+    		for(int i=0;i<add.getNodesCount();i++){
+    			if(add.getNode(i)!=w1.getNode(0)&&add.getNode(i)!=w1.getNode(w1.getNodesCount()-1))
+    				w1.addNode(add.getNode(i));
+    		}
+    	}
+    	    	
+    	//Remove dubles
+    	Node lastnode=w1.getNode(0);
+    	List <Node> ln=w1.getNodes();
+    	for(int i=1;i<ln.size();){
+    		if(lastnode==w1.getNode(i)){
+    			ln.remove(i);
+    		}else{
+    			i++;
+    		}    			
+    	}
+    	ln.add(ln.get(0));
+    	w1.setNodes(ln);    	
     }
 
     @Override
