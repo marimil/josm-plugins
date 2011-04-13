@@ -176,17 +176,19 @@ public class AreaCutAction extends JosmAction {
     
     
     private void removeDub(Way w1){
-  //	Remove dubles
-    	Node lastnode=w1.getNode(0);
-    	List <Node> ln=w1.getNodes();
-    	for(int i=1;i<ln.size();){
-    		if(lastnode==w1.getNode(i)){
-    			ln.remove(i);
-    			lastnode=w1.getNode(i);
-    		}else{
-    			i++;
-    		}    			
+    	//Remove dubles
+    	List <Node> ln=new ArrayList<Node>();
+    	
+    	for(int i=0;i<w1.getNodesCount();i++){
+    		boolean isIn=false;
+    		for(int j=0;j<ln.size();j++){
+    			if(ln.get(j)==w1.getNode(i))
+    				isIn=true;
+    		}
+    		if(!isIn)
+    			ln.add(w1.getNode(i));
     	}
+    	//Last
     	ln.add(ln.get(0));
     	w1.setNodes(ln);   
     }
